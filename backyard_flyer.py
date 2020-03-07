@@ -48,7 +48,8 @@ class BackyardFlyer(Drone):
         elif self.flight_state == States.WAYPOINT:
             # check if current waypoint position has been reached - this is done by
             # calculating the Euclidian norm between target and local position
-            if np.linalg.norm(self.target_position[0:2] - self.local_position[0:2]) < 1.:
+            if (np.linalg.norm(self.target_position[0:2] - self.local_position[0:2]) < 1.) and \
+                (np.linalg.norm(self.local_velocity[0:2]) < 1.):
                 # check if there are waypoints left
                 if len(self.all_waypoints) > 0:
                     # get next waypoint as target position
@@ -65,9 +66,9 @@ class BackyardFlyer(Drone):
 
         # handle landing state finish hered
         if self.flight_state == States.LANDING:
-            if self.global_position[2] - self.global_home[2] < 0.1:
+            if self.global_position[2] - self.global_home[2] < 1:
                 if abs(self.local_position[2]) < 0.01:
-                    self.disarming_transition
+                    self.disarming_transition()
 
     def state_callback(self):
         """
@@ -88,10 +89,7 @@ class BackyardFlyer(Drone):
         print("Calculate box waypoints")
 
         # 20m to the left, 20m forward, 20 right, 20m back
-        return [[self.global_home[0] + 5., self.global_home[1], 3.],
-                [self.global_home[0] + 5., self.global_home[1] + 5., 3.],
-                [self.global_home[0], self.global_home[1] + 5., 3.],
-                [self.global_home[0], self.global_home[1], 3.]]
+        return[[20., 0., 3.], [20., 20., 3.], [0., 20., 3.], [0., 0., 3.]]
 
     def arming_transition(self):
 
